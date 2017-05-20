@@ -34,7 +34,10 @@ class RasPiIot
     hum = (hum_h << 8) | hum_l
     temp = ((temp_h << 8) | temp_l) / 4
 
+    temperature = temp * 1.007e-2 - 40.0
+
     return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
+    return "{\"Items\":{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}}"
   end
 
   #Output data to AWSIoT
@@ -68,11 +71,7 @@ class RasPiIot
     end
 =end
 
-    3.times do
-
-      sleep(2)
-
-    end
+    inputData = fetch_humidity_temperature
 
     my_shadow_client.disconnect
   end
