@@ -13,7 +13,7 @@ class Hih6130Sensor
     hum_h, hum_l, temp_h, temp_l = s.bytes.to_a
 
     status = (hum_h >> 6) & 0x03
-    time = Time.now.getlocal
+    time = Time.now
     hum_h = hum_h & 0x3f
     hum = (hum_h << 8) | hum_l
     temp = ((temp_h << 8) | temp_l) / 4
