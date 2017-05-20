@@ -72,21 +72,19 @@ class RasPiIot
 =end
 
     inputData = fetch_humidity_temperature
+    my_shadow_client.update_shadow(inputData)
 
     my_shadow_client.disconnect
   end
 
-  def generate_json
-    value = read_enviroments
-    temp_and_humi = "{\"state\":{\"desired\":{\"temperature\":\"#{value.temperature}\",\"humidity\":\"#{value.humidity}\"},\"reported\":{\"temperature\":\"#{value.temperat\
-ure}\",\"humidity\":\"#{value.humidity}\"}}}"
-  end
 end
 
 
+#Following are processed codes
 sensingWithRaspi = RasPiIot.new('/dev/i2c-1')
 
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
+  sensingWithRaspi.outputData
   sleep(2)
 end
