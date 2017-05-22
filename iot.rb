@@ -1,5 +1,4 @@
-# require 'dht-sensor-ffi'
-require 'aws_iot_device'
+require 'mqtt'
 require 'i2c'
 # require 'optparse'
 require 'json'
@@ -11,12 +10,13 @@ require 'date'
 class RasPiIot
   def initialize(path, address = 0x27)
     #AWSIoT
-    @host = "region.amazonaws.com"
+    @host = "xxx.iot.us-east-1.amazonaws.com"
+    @topic = "topic/Temp"
     @port = 8883
-    @certificate_path = "certificate.pem.crt"
-    @private_key_path = "private.pem.key"
+    @certificate_path = ".pem.crt"
+    @private_key_path = ".pem.key"
     @root_ca_path     = "root-CA.crt"
-    @thing = "thing's name"
+    @thing = "thingName"
 
     #i2c
     @device = I2C.create(path)
@@ -37,46 +37,16 @@ class RasPiIot
     temperature = temp * 1.007e-2 - 40.0
 
     #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
-    return "{\"Items\":{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}}"
+    return "{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}"
   end
 
   #Output data to AWSIoT
   def outputData
-    my_shadow_client = AwsIotDevice::MqttShadowClient::ShadowClient.new
-    my_shadow_client.configure_endpoint(@host, @port)
-    my_shadow_client.configure_credentials(@root_ca_path, @private_key_path, @certificate_path)
-    my_shadow_client.create_shadow_handler_with_name(@thing, true)
-
-    my_shadow_client.connect
-
-
-=begin
-    filter_callback = Proc.new do |message|
-      puts "Executing the specific callback for topic: #{message.topic}\n##########################################\\n"
-    end
-
-    delta_callback = Proc.new do |delta|
-      message = JSON.parse(delta.payload)
-      puts "Catching a new message : #{message["state"]["message"]}\n##########################################\n"
-    end
-
-
-    my_shadow_client.register_delta_callback(delta_callback)
-
-    while true
-      pp temp_and_humi = generate_json
-      my_shadow_client.update_shadow(temp_and_humi, filter_callback, 5)
-
-      sleep(2)
-    end
-=end
-
     inputData = fetch_humidity_temperature
-    my_shadow_client.update_shadow(inputData)
-
-    my_shadow_client.disconnect
+    MQTT::Client.connect(host:@host, port: 8883, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
+      client.publish(@topic, inputData)
+    end
   end
-
 end
 
 
