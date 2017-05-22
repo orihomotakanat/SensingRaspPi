@@ -4,20 +4,19 @@ require 'i2c'
 require 'json'
 require 'pp'
 require 'date'
-
-
+require 'yaml'
 
 class RasPiIot
   def initialize(path, address = 0x27)
-    #AWSIoT
-    @host = "xxx.iot.us-east-1.amazonaws.com"
-    @topic = "topic/Temp"
-    @port = 8883
-    @certificate_path = ".pem.crt"
-    @private_key_path = ".pem.key"
-    @root_ca_path     = "root-CA.crt"
-    @thing = "thingName"
-
+    #AWSIoT Read yaml
+    iotconfig = YAML.load_file("iot.yml")
+    @host = iotconfig["iotConfig"]["host"]
+    @topic = iotconfig["iotConfig"]["topic"]
+    @port = iotconfig["iotConfig"]["port"]
+    @certificate_path = iotconfig["iotConfig"]["certificatePath"]
+    @private_key_path = iotconfig["iotConfig"]["privateKeyPath"]
+    @root_ca_path = iotconfig["iotConfig"]["rootCaPath"]
+    @thing = iotconfig["iotConfig"]["thing"]
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -56,5 +55,5 @@ sensingWithRaspi = RasPiIot.new('/dev/i2c-1')
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
   sensingWithRaspi.outputData
-  sleep(2)
+  sleep(3)
 end
