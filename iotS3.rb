@@ -36,14 +36,22 @@ class RasPiIotS3
     temperature = temp * 1.007e-2 - 40.0
 
     #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
-    return "{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}"
+    return "#{time},#{temperature}"
+  end
+
+  def makingcsv
+    time = Time.now.getlocal
+
+    File.open("iotTempLog_#{time}.csv", "w") do |first_line|
+        first_line.write "time, temp"
+    end #File.open(resultfile, "w") do |result| end
   end
 
   #Output data to AWSIoT
   def outputData
     inputData = fetch_humidity_temperature
-    MQTT::Client.connect(host:@host, port: 8883, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      client.publish(@topic, inputData)
+    MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
+    client.publish(@topic, inputData)
     end
   end
 end
@@ -54,6 +62,8 @@ sensingWithRaspi = RasPiIotS3.new('/dev/i2c-1')
 
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
-  sensingWithRaspi.outputData
+  #sensingWithRaspi.outputData
   sleep(3)
 end
+
+sensingWithRaspi.makingcsv
