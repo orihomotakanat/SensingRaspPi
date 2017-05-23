@@ -6,17 +6,17 @@ require 'pp'
 require 'date'
 require 'yaml'
 
-class RasPiIot
+class RasPiIotS3
   def initialize(path, address = 0x27)
     #AWSIoT Read yaml
     iotconfig = YAML.load_file("iot.yml")
-    @host = iotconfig["iotConfig"]["host"]
-    @topic = iotconfig["iotConfig"]["topic"]
-    @port = iotconfig["iotConfig"]["port"]
-    @certificate_path = iotconfig["iotConfig"]["certificatePath"]
-    @private_key_path = iotconfig["iotConfig"]["privateKeyPath"]
-    @root_ca_path = iotconfig["iotConfig"]["rootCaPath"]
-    @thing = iotconfig["iotConfig"]["thing"]
+    @host = iotconfig["iotS3Config"]["host"]
+    @topic = iotconfig["iotS3Config"]["topic"]
+    @port = iotconfig["iotS3Config"]["port"]
+    @certificate_path = iotconfig["iotS3Config"]["certificatePath"]
+    @private_key_path = iotconfig["iotS3Config"]["privateKeyPath"]
+    @root_ca_path = iotconfig["iotS3Config"]["rootCaPath"]
+    @thing = iotconfig["iotS3Config"]["thing"]
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -50,7 +50,7 @@ end
   #Setting of output "iotTempLog_${timestamp()}.csv"
 
 #Following are processed codes
-sensingWithRaspi = RasPiIot.new('/dev/i2c-1')
+sensingWithRaspi = RasPiIotS3.new('/dev/i2c-1')
 
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
