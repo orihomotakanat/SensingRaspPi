@@ -1,4 +1,17 @@
-# SensingRasPi.rb
-This code is enable to make connection between Raspberry-Pi and a specific server.
+# Sensing temperauture with Rasberry-Pi!!
+This code enables you to get Humidity and Temperature with Raspberry-Pi.
 
-This code is enable you to get Humidity and Temperature.
+### Environment
+* Ruby - 2.4.1
+* Raspberry-Pi 3 model B
+* Needed sensor: HIH6130Sensor
+* Needed installation of gems
+  - i2c
+  - mqtt
+  - json
+
+## iot.rb
+iot.rb enables you to do sensing temperature and send to AWSIoT using MQTT protocol.
+
+## sensing.rb
+sensing.rb enables you to do sensing temperature and humidity using HIH6130Sensor.
