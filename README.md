@@ -1,4 +1,4 @@
-# Sensing temperauture with Rasberry-Pi!!
+# Sensing temperauture with Raspberry-Pi!!
 This code enables you to get Humidity and Temperature with Raspberry-Pi.
 
 ### Environment
@@ -14,4 +14,4 @@ This code enables you to get Humidity and Temperature with Raspberry-Pi.
 iot.rb enables you to do sensing temperature and send to AWSIoT using MQTT protocol.
 
 ## sensing.rb
-sensing.rb enables you to do sensing temperature and humidity using HIH6130Sensor.
+sensingRaspi.rb enables you to do sensing temperature and humidity using HIH6130Sensor.
