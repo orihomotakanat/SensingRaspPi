@@ -1,6 +1,6 @@
 require 'mqtt'
 require 'i2c'
-# require 'optparse'
+require 'fileutils'
 require 'json'
 require 'pp'
 require 'date'
@@ -47,7 +47,7 @@ class RasPiIot
     end
   end
 end
-
+  #Setting of output "iotTempLog_${timestamp()}.csv"
 
 #Following are processed codes
 sensingWithRaspi = RasPiIot.new('/dev/i2c-1')
