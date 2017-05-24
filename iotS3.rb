@@ -7,7 +7,9 @@ require 'date'
 require 'yaml'
 
 class RasPiIotS3
-  def initialize(path, address = 0x27)
+
+  attr_accessor :airconmode
+  def initialize(path, address = 0x27, airconmode= 0)
     #AWSIoT Read yaml
     iotconfig = YAML.load_file("iot.yml")
     @host = iotconfig["iotS3Config"]["host"]
@@ -28,6 +30,8 @@ class RasPiIotS3
     @starttime = 0
     @finishtime = 0
     @tini = 0
+
+    @airconmode = airconmode #エアコンが起動時と終了時のみ1．それ以外は0
   end
 
   #fetch Humidity & Temperature with i2c device
@@ -43,7 +47,7 @@ class RasPiIotS3
 
     @temp = temp * 1.007e-2 - 40.0
     @humidity  = hum * 6.10e-3
-    outputjson = JSON.generate({"datetime" => @time, "temp" => @temp})
+    outputjson = JSON.generate({"datetime" => @time, "temp" => @temp, "airconmode" => @airconmode})
     #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
     #return "{\"time\":#{@time},\"temp\":#{@temp}}"
     return outputjson
@@ -76,6 +80,7 @@ end
 #Following are processed codes
 sensingWithRaspi = RasPiIotS3.new('/dev/i2c-1')
 
+#sensingWithRaspi.airconmode = 1 #shadowでonになった時
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
   sensingWithRaspi.outputData
