@@ -20,6 +20,9 @@ class RasPiIot
     #i2c
     @device = I2C.create(path)
     @address = address
+
+    @time = 0
+    @temp = 0
   end
 
   #fetch Humidity & Temperature with i2c device
@@ -28,13 +31,13 @@ class RasPiIot
     hum_h, hum_l, temp_h, temp_l = s.bytes.to_a
 
     status = (hum_h >> 6) & 0x03
-    time = Time.now.getlocal
+    @time = Time.now.to_i
     hum_h = hum_h & 0x3f
     hum = (hum_h << 8) | hum_l
     temp = ((temp_h << 8) | temp_l) / 4
 
-    temperature = temp * 1.007e-2 - 40.0
-    outputjson = JSON.generate({"time" => time, "temp" => temperature})
+    @temp = temp * 1.007e-2 - 40.0
+    outputjson = JSON.generate({"time" => @time, "temp" => @temp})
     #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
     #return "{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}"
     return outputjson

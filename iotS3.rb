@@ -80,7 +80,7 @@ end
 #Following are processed codes
 sensingWithRaspi = RasPiIotS3.new('/dev/i2c-1')
 
-#sensingWithRaspi.airconmode = 1 #shadowでonになった時
+sensingWithRaspi.airconmode = 1 #shadowでonになった時
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
   sensingWithRaspi.outputData
