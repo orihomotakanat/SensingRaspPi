@@ -34,9 +34,10 @@ class RasPiIot
     temp = ((temp_h << 8) | temp_l) / 4
 
     temperature = temp * 1.007e-2 - 40.0
-
+    outputjson = JSON.generate({"time" => time, "temp" => temperature})
     #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
-    return "{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}"
+    #return "{\"time\":\"#{time}\",\"temp\":\"#{temperature}\"}"
+    return outputjson
   end
 
   #Output data to AWSIoT
