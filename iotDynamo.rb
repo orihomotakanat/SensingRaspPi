@@ -56,8 +56,10 @@ end
 #Following are processed codes
 sensingWithRaspi = RasPiIot.new('/dev/i2c-1')
 
+Process.daemon
+
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
   sensingWithRaspi.outputData
-  sleep(3)
+  sleep(60)
 end
