@@ -9,8 +9,19 @@ require 'yaml'
 class RasPiIotShadow
   attr_accessor :airconmode
   def initialize(path, address = 0x27, airconmode= 0)
-    #AWSIoT Read yaml
+    #i2c
+    @device = I2C.create(path)
+    @address = address
+    @time = 0
+    @temp = 0
+    @humidity = 0
+
+    #airconSetting
+    @setting = 20
+    @airconmode = airconmode #TunrnedOnAircon -> 1, TurnedOffAircon -> 0
+    
     iotconfig = YAML.load_file("iot.yml")
+    #toKinesis and tempChecker
     @host = iotconfig["iotShadowConfig"]["host"]
     @topic = iotconfig["iotShadowConfig"]["topic"]
     @port = iotconfig["iotShadowConfig"]["port"]
@@ -18,19 +29,10 @@ class RasPiIotShadow
     @private_key_path = iotconfig["iotShadowConfig"]["privateKeyPath"]
     @root_ca_path = iotconfig["iotShadowConfig"]["rootCaPath"]
     @thing = iotconfig["iotShadowConfig"]["thing"]
-    #i2c
-    @device = I2C.create(path)
-    @address = address
 
-    @time = 0
-    @temp = 0
-    @humidity = 0
-    @dt = 0 #finishtime - starttime
-    @starttime = 0
-    @finishtime = 0
-    @tini = 0
-
-    @airconmode = airconmode #エアコンが起動時と終了時のみ1．それ以外は0
+    #turnOnAircon and turnOffAircon
+    @topicTurnedOn = iotconfig["airconConfig"]["topicOn"]
+    @topicTurnedOff = iotconfig["airconConfig"]["topicOff"]
   end
 
   #fetch Humidity & Temperature with i2c device
@@ -53,10 +55,13 @@ class RasPiIotShadow
   end
 
 #Output data to AWSIoT
-  def outputData
+  def toKinesis
     inputData = fetch_humidity_temperature
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-    client.publish(@topic, inputData)
+      #client.publish(@topic, inputData)
+      if client.subscribe(@topic)
+        puts message = client.get
+      end
     end
   end
 end
@@ -65,10 +70,12 @@ end
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
-sensingWithRaspi.airconmode = 1 #shadowでonになった時
 loop do
-  puts sensingWithRaspi.fetch_humidity_temperature
-  sensingWithRaspi.outputData
+  #puts sensingWithRaspi.fetch_humidity_temperature
+  sensingWithRaspi.toKinesis
+  puts sensingWithRaspi.airconmode = 1
+  puts "Aircon is turned on"
+  puts sensingWithRaspi.airconmode = 0
   #sleep(3)
 end
 
