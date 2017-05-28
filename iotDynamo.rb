@@ -61,5 +61,5 @@ Process.daemon
 loop do
   puts sensingWithRaspi.fetch_humidity_temperature
   sensingWithRaspi.outputData
-  sleep(60)
+  sleep(180)
 end

@@ -6,19 +6,18 @@ require 'pp'
 require 'date'
 require 'yaml'
 
-class RasPiIotS3
-
+class RasPiIotShadow
   attr_accessor :airconmode
   def initialize(path, address = 0x27, airconmode= 0)
     #AWSIoT Read yaml
     iotconfig = YAML.load_file("iot.yml")
-    @host = iotconfig["iotS3Config"]["host"]
-    @topic = iotconfig["iotS3Config"]["topic"]
-    @port = iotconfig["iotS3Config"]["port"]
-    @certificate_path = iotconfig["iotS3Config"]["certificatePath"]
-    @private_key_path = iotconfig["iotS3Config"]["privateKeyPath"]
-    @root_ca_path = iotconfig["iotS3Config"]["rootCaPath"]
-    @thing = iotconfig["iotS3Config"]["thing"]
+    @host = iotconfig["iotShadowConfig"]["host"]
+    @topic = iotconfig["iotShadowConfig"]["topic"]
+    @port = iotconfig["iotShadowConfig"]["port"]
+    @certificate_path = iotconfig["iotShadowConfig"]["certificatePath"]
+    @private_key_path = iotconfig["iotShadowConfig"]["privateKeyPath"]
+    @root_ca_path = iotconfig["iotShadowConfig"]["rootCaPath"]
+    @thing = iotconfig["iotShadowConfig"]["thing"]
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -52,22 +51,8 @@ class RasPiIotS3
     #return "{\"time\":#{@time},\"temp\":#{@temp}}"
     return outputjson
   end
-=begin
-  def makingcsv
-    @starttime = Time.now.getlocal
-    puts @starttime
-    File.open("iotTempLog_#{@starttime}.csv", "w") do |first_line|
-        first_line.write "time, temp\n"
-    end #File.open(resultfile, "w") do |result| end
-  end
 
-  def addDataCsv
-    File.open("iotTempLog_#{@starttime}.csv", "a") do |data_line|
-      data_line.write "#{@time}, #{@temp}\n" #Write Tini, Tend, dt
-    end
-  end
-=end
-  #Output data to AWSIoT
+#Output data to AWSIoT
   def outputData
     inputData = fetch_humidity_temperature
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
@@ -78,7 +63,7 @@ end
   #Setting of output "iotTempLog_${timestamp()}.csv"
 
 #Following are processed codes
-sensingWithRaspi = RasPiIotS3.new('/dev/i2c-1')
+sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
 sensingWithRaspi.airconmode = 1 #shadowでonになった時
 loop do
