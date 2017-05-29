@@ -40,7 +40,6 @@ class RasPiIotShadow
       puts "waiting turnonCommand.."
       client.subscribe(@topicTurnedOn)
       client.get #ここでturnOn.sh
-      client.publish(@topicTurnedOn, "TurnOn") #For Debug
     end #MQTT end
   end #def turnOnAircon end
 
@@ -53,7 +52,6 @@ sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 Process.daemon
 #turnOnAircon process
 loop do
-  puts sensingWithRaspi.airconmode
   sensingWithRaspi.turnOnAircon
   puts "Turn On"#exec .sh command (airconOn)
 end
