@@ -21,24 +21,22 @@ class RasPiIotShadow
     @topicOn = iotconfig["iotAirconTestCongig"]["topicOn"]
     @topicOff = iotconfig["iotAirconTestCongig"]["topicOff"]
 
-    @messageHello = "Hello"
-    @messageWorld = "World"
   end
 
 
 #Output data to AWSIoT
   def outputData
+    inputData = 1
     inputDataOn = "Send on"
     inputDataOff = "Send Off"
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-    #client.publish(@topic, inputData)
-    client.publish(@topicOff, inputDataOn)
-    client.publish(@topicOn, inputDataOff)
+    client.publish(@topic, inputData)
+    #client.publish(@topicOff, inputDataOn)
+    #client.publish(@topicOn, inputDataOff)
     puts "Waiting 5 sec"
     sleep(5)
-    puts client.subscribe(@topicOff)
-    puts client.subscribe(@topicOn)
-    puts client.get
+    #puts client.subscribe(@topicOff)
+    #puts client.subscribe(@topicOn)
     end
   end
 end
