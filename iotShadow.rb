@@ -100,23 +100,18 @@ sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
   end
   end
 =end
-pid2 = Process.fork 
   #turnOnAircon process
-if pid2
   loop do
     puts sensingWithRaspi.airconmode
     sensingWithRaspi.turnOnAircon
     puts sensingWithRaspi.airconmode = 1
   end
-else
   #turnOffAircon process
   loop do
     puts sensingWithRaspi.airconmode
     sensingWithRaspi.turnOffAircon
     puts sensingWithRaspi.airconmode = 0
   end
-end
-
 
 =begin
 #dataChecker and toKinesis process
