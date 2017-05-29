@@ -25,19 +25,19 @@ class RasPiIotShadow
     @messageWorld = "World"
   end
 
-  #fetch Humidity & Temperature with i2c device
-  def pubMessageTest
-    outputjson = "Turn off Aircon"#JSON.generate({"Ruby" => @messageHello, "Swift" => @messageWorld})
-    return outputjson
-  end
 
 #Output data to AWSIoT
   def outputData
-    inputData = pubMessageTest
+    inputDataOn = "Send on"
+    inputDataOff = "Send Off"
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
     #client.publish(@topic, inputData)
-    client.publish(@topicOff, inputData)
-    client.subscribe(@topicOff)
+    client.publish(@topicOff, inputDataOn)
+    client.publish(@topicOn, inputDataOff)
+    puts "Waiting 5 sec"
+    sleep(5)
+    puts client.subscribe(@topicOff)
+    puts client.subscribe(@topicOn)
     puts client.get
     end
   end
@@ -47,6 +47,6 @@ end
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new
 
-
-puts sensingWithRaspi.pubMessageTest
+loop do
 sensingWithRaspi.outputData
+end
