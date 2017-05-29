@@ -55,9 +55,9 @@ class RasPiIotShadow
 
   def dataChecker
     checkedTemp = JSON.parse
-    if checkedTemp <= @setTemp {
+    if checkedTemp <= @setTemp 
       @airconmode = 0
-    }
+    end
   end #def dataChecker
 
   #Output data to KinesisStream via AWSIoT
@@ -70,17 +70,21 @@ class RasPiIotShadow
 
   def turnOnAircon
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      puts waiting...
-      client.subscribe(@topic)
-      puts turnon #ここでturnOn.sh
+      puts "waiting turnonCommand.."
+      client.subscribe(@topicTurnedOn)
+      client.get #ここでturnOn.sh
+      client.publish(@topicTurnedOn, "TurnOn") #For Debug
+      @airconmode = 1
     end #MQTT end
   end #def turnOnAircon end
 
   def turnOffAircon
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      puts waiting...
-      client.subscribe(@topic)
-      puts turnoff #ここでturnOn.sh
+      puts "waiting turnoffCommand..."
+      client.subscribe(@topicTurnedOff)
+      client.get #ここでturnOn.sh
+      client.publish(@topicTurnedOff, "TurnOff") #For Debug
+    @airconmode = 0
     end #MQTT end
   end #def turnOffAircon end
 
@@ -89,25 +93,36 @@ end #class RasPiIotShadow end
 
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
-
-#dataChecker process
 =begin
+  loop do
+  if sensingWithRaspi.airconmode == 1
+    puts "I'm pid2"
+  end
+  end
+=end
+pid2 = Process.fork 
+  #turnOnAircon process
+if pid2
+  loop do
+    puts sensingWithRaspi.airconmode
+    sensingWithRaspi.turnOnAircon
+    puts sensingWithRaspi.airconmode = 1
+  end
+else
+  #turnOffAircon process
+  loop do
+    puts sensingWithRaspi.airconmode
+    sensingWithRaspi.turnOffAircon
+    puts sensingWithRaspi.airconmode = 0
+  end
+end
+
+
+=begin
+#dataChecker and toKinesis process
 loop do
   sensingWithRaspi.dataChecker
-end
-=end
-#turnOnAircon process
-loop do
-  sensingWithRaspi.turnOnAircon
-end
-
-#turnOffAircon process
-loop do
-  sensingWithRaspi.turnOffAircon
-end
-
-
-#toKinesis process
-loop do
+  puts sensingWithRaspi.airconmode
   sensingWithRaspi.toKinesis
 end
+=end
