@@ -30,9 +30,9 @@ class RasPiIotShadow
     inputDataOn = "Send on"
     inputDataOff = "Send Off"
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-    client.publish(@topic, inputData)
-    #client.publish(@topicOff, inputDataOn)
-    #client.publish(@topicOn, inputDataOff)
+    #client.publish(@topic, inputData)
+    client.publish(@topicOn, inputDataOn)
+    #client.publish(@topicOff, inputDataOff)
     puts "Waiting 5 sec"
     sleep(5)
     #puts client.subscribe(@topicOff)
@@ -46,5 +46,5 @@ end
 sensingWithRaspi = RasPiIotShadow.new
 
 loop do
-sensingWithRaspi.outputData
+    sensingWithRaspi.outputData
 end
