@@ -7,8 +7,8 @@ require 'date'
 require 'yaml'
 
 class RasPiIotShadow
-  attr_accessor :airconmode
-  def initialize(path, address = 0x27, airconmode= 0)
+  attr_accessor :airconmode, :turnOnSignal, :turnOffSignal, :sendOnCommand, :sendOffCommand
+  def initialize(path, address = 0x27, airconmode= 0, turnOnSignal, turnOffSignal)
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -33,6 +33,12 @@ class RasPiIotShadow
     #turnOnAircon and turnOffAircon
     @topicTurnedOn = iotconfig["airconConfig"]["topicOn"]
     @topicTurnedOff = iotconfig["airconConfig"]["topicOff"]
+
+    #turnOn or turnOff command for Advanced remote controller
+    @turnOnSignal = turnOnsiganl
+    @turnOffSignal = turnOffSignal
+    @sendOnCommand = "bto_advanced_USBIR_cmd -d #{@turnOnSignal}"
+    @sendOffCommand = "bto_advanced_USBIR_cmd -d #{@turnOffSignal}"
   end
 
   def turnOnAircon
@@ -54,4 +60,7 @@ sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 loop do
   sensingWithRaspi.turnOnAircon
   puts "Turn On"#exec .sh command (airconOn)
+  sensingWithRaspi.turnOnSignal = File.read("turnOn.txt")
+  puts sensingWithRaspi.turnOnSignal
+  sensingWithRaspi.sendOnCommand
 end
