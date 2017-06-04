@@ -7,8 +7,8 @@ require 'date'
 require 'yaml'
 
 class RasPiIotShadow
-  attr_accessor :airconmode, :turnOnSignal, :turnOffSignal, :sendCommand
-  def initialize(path, address = 0x27, airconmode= 0, turnOnSignal=nil, turnOffSignal=nil, sendCommand=nil)
+  attr_accessor :airconmode, :turnOnSignal, :turnOffSignal
+  def initialize(path, address = 0x27, airconmode= 0, turnOnSignal=nil, turnOffSignal=nil)
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -37,14 +37,13 @@ class RasPiIotShadow
     #turnOn or turnOff command for Advanced remote controller
     @turnOnSignal = turnOnSignal
     @turnOffSignal = turnOffSignal
-    @sendCommand = sendCommand #"bto_advanced_USBIR_cmd -d #{turnOnSignal}"
   end
 
   def waitTurnOn
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
       puts "waiting turnonCommand.."
       client.subscribe(@topicTurnedOn)
-      client.get #ここでturnOn.sh
+      client.get #wait ios-app command
     end #MQTT end
   end #def turnOnAircon end
 
@@ -53,8 +52,7 @@ class RasPiIotShadow
     if on
       puts "send TurnOn command"
     end
-
-  end
+  end #def turnOnAircon end
 
 end #class RasPiIotShadow end
 
@@ -66,8 +64,6 @@ Process.daemon(nochdir = true, noclose = nil)
 #turnOnAircon process
 loop do
   sensingWithRaspi.waitTurnOn
-  #puts "Turn On"#exec .sh command (airconOn)
   sensingWithRaspi.turnOnSignal = File.read("turnOn.txt")
-  #puts sensingWithRaspi.turnOnSignal
   sensingWithRaspi.turnOnAircon
 end
