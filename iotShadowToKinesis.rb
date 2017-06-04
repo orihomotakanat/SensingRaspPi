@@ -48,13 +48,13 @@ class RasPiIotShadow
     temp = ((temp_h << 8) | temp_l) / 4
 
     @temp = temp * 1.007e-2 - 40.0
-    #@humidity  = hum * 6.10e-3
+    @humidity  = hum * 6.10e-3
 
     if @temp <= @setTemp
       puts @airconmode = 0 #puts: For debug
     end #if @temp... end
 
-    jsonToKinesis = JSON.generate({"datetime" => @time, "temp" => @temp, "airconmode" => @airconmode})
+    jsonToKinesis = JSON.generate({"datetime" => @time, "temp" => @temp, "humidity" => @humidity, "airconmode" => @airconmode})
     return jsonToKinesis
   end #def fetch_humidity_temperature end
 
