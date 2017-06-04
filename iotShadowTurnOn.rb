@@ -7,8 +7,8 @@ require 'date'
 require 'yaml'
 
 class RasPiIotShadow
-  attr_accessor :airconmode, :turnOnSignal, :turnOffSignal, :sendOnCommand, :sendOffCommand
-  def initialize(path, address = 0x27, airconmode= 0, turnOnSignal, turnOffSignal)
+  attr_accessor :airconmode, :turnOnSignal, :turnOffSignal, :sendCommand
+  def initialize(path, address = 0x27, airconmode= 0, turnOnSignal=nil, turnOffSignal=nil, sendCommand=nil)
     #i2c
     @device = I2C.create(path)
     @address = address
@@ -35,13 +35,12 @@ class RasPiIotShadow
     @topicTurnedOff = iotconfig["airconConfig"]["topicOff"]
 
     #turnOn or turnOff command for Advanced remote controller
-    @turnOnSignal = turnOnsiganl
+    @turnOnSignal = turnOnSignal
     @turnOffSignal = turnOffSignal
-    @sendOnCommand = "bto_advanced_USBIR_cmd -d #{@turnOnSignal}"
-    @sendOffCommand = "bto_advanced_USBIR_cmd -d #{@turnOffSignal}"
+    @sendCommand = sendCommand #"bto_advanced_USBIR_cmd -d #{turnOnSignal}"
   end
 
-  def turnOnAircon
+  def waitTurnOn
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
       puts "waiting turnonCommand.."
       client.subscribe(@topicTurnedOn)
@@ -49,18 +48,26 @@ class RasPiIotShadow
     end #MQTT end
   end #def turnOnAircon end
 
+  def turnOnAircon
+    on = system("bto_advanced_USBIR_cmd -d #{@turnOnSignal}")
+    if on
+      puts "send TurnOn command"
+    end
+
+  end
+
 end #class RasPiIotShadow end
 
 
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
-#Process.daemon
+Process.daemon(nochdir = true, noclose = nil)
 #turnOnAircon process
 loop do
-  sensingWithRaspi.turnOnAircon
-  puts "Turn On"#exec .sh command (airconOn)
+  sensingWithRaspi.waitTurnOn
+  #puts "Turn On"#exec .sh command (airconOn)
   sensingWithRaspi.turnOnSignal = File.read("turnOn.txt")
-  puts sensingWithRaspi.turnOnSignal
-  sensingWithRaspi.sendOnCommand
+  #puts sensingWithRaspi.turnOnSignal
+  sensingWithRaspi.turnOnAircon
 end

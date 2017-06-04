@@ -12,4 +12,6 @@ def signalGetter(filename)
   save = system(saveCommand)
 end
 
-signalGetter("xxx.txt") #turnOn.txt or turnOff.txt
+puts "Start reception of command"
+signalGetter("turnOff.txt") #turnOn.txt or turnOff.txt
+puts "Finish"
