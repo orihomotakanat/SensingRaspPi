@@ -49,7 +49,7 @@ end #class RasPiIotShadow end
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
-Process.daemon
+#Process.daemon
 #turnOnAircon process
 loop do
   sensingWithRaspi.turnOnAircon

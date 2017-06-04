@@ -80,17 +80,17 @@ end #class RasPiIotShadow end
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
+#Process.daemon
 #dataChecker and toKinesis process
-
 loop do
   begin 
-    Timeout.timeout(3) do
+    Timeout.timeout(1) do #wait 1 sec nad if false -> call rescue
       sensingWithRaspi.airconmodeGetter
       puts "Received airconmode" + sensingWithRaspi.airconmode
     end
   rescue Timeout::Error
     puts "dataChecker" + sensingWithRaspi.dataChecker
-    #sensingWithRaspi.toKinesis
+    sensingWithRaspi.toKinesis
     puts "Lets go Kinesis"
   end
 end
