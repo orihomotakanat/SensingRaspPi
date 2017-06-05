@@ -30,9 +30,9 @@ class RasPiIotShadow
     @root_ca_path = iotconfig["iotShadowConfig"]["rootCaPath"]
     @thing = iotconfig["iotShadowConfig"]["thing"]
 
-    #turnOnAircon and turnOffAircon
-    @topicTurnedOn = iotconfig["airconConfig"]["topicOn"]
-    @topicTurnedOff = iotconfig["airconConfig"]["topicOff"]
+    #iOS
+    @receiveiOS = iotconfig["iotShadowConfig"]["receiveiOS"]
+    @topiciOS = iotconfig["iotShadowConfig"]["topiciOS"]
   end
 
   #fetch Humidity & Temperature with i2c device
@@ -48,76 +48,28 @@ class RasPiIotShadow
 
     @temp = temp * 1.007e-2 - 40.0
     @humidity  = hum * 6.10e-3
-    outputjson = JSON.generate({"datetime" => @time, "temp" => @temp, "airconmode" => @airconmode})
-    #return "time=#{time}","status=#{status}", "Humidity=#{hum* 6.10e-3}", "Temperature=#{temp * 1.007e-2 - 40.0}","\n"
+    outputjson = JSON.generate({"temp" => @temp, "humidity" => @humidity})
     return outputjson
   end #def fetch_humidity_temperature end
 
-  def dataChecker
-    checkedTemp = JSON.parse
-    if checkedTemp <= @setTemp 
-      @airconmode = 0
-    end
-  end #def dataChecker
-
-  #Output data to KinesisStream via AWSIoT
-  def toKinesis
+  #Output data to iosApp via AWSIoT
+  def toiOS
     inputData = fetchData
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      client.publish(@topic, inputData) #publish room-temperature to AWSIoT
+      client.subscribe(@receiveiOS)
+      client.get
+      client.publish(@topiciOS, inputData) #publish room-temperature to AWSIoT
     end #MQTT end
-  end #def toKinesis end
-
-  def turnOnAircon
-    MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      puts "waiting turnonCommand.."
-      client.subscribe(@topicTurnedOn)
-      client.get #ここでturnOn.sh
-      client.publish(@topicTurnedOn, "TurnOn") #For Debug
-      @airconmode = 1
-    end #MQTT end
-  end #def turnOnAircon end
-
-  def turnOffAircon
-    MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
-      puts "waiting turnoffCommand..."
-      client.subscribe(@topicTurnedOff)
-      client.get #ここでturnOn.sh
-      client.publish(@topicTurnedOff, "TurnOff") #For Debug
-    @airconmode = 0
-    end #MQTT end
-  end #def turnOffAircon end
+  end #def toiOS
 
 end #class RasPiIotShadow end
 
 
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
-=begin
-  loop do
-  if sensingWithRaspi.airconmode == 1
-    puts "I'm pid2"
-  end
-  end
-=end
-  #turnOnAircon process
-  loop do
-    puts sensingWithRaspi.airconmode
-    sensingWithRaspi.turnOnAircon
-    puts sensingWithRaspi.airconmode = 1
-  end
-  #turnOffAircon process
-  loop do
-    puts sensingWithRaspi.airconmode
-    sensingWithRaspi.turnOffAircon
-    puts sensingWithRaspi.airconmode = 0
-  end
 
-=begin
-#dataChecker and toKinesis process
+Process.daemon
 loop do
-  sensingWithRaspi.dataChecker
-  puts sensingWithRaspi.airconmode
-  sensingWithRaspi.toKinesis
+    puts sensingWithRaspi.fetchData
+    sensingWithRaspi.toiOS
 end
-=end
