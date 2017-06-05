@@ -61,7 +61,7 @@ class RasPiIotShadow
   def airconmodeGetter
     MQTT::Client.connect(host:@host, port:@port, ssl: true, cert_file:@certificate_path, key_file:@private_key_path, ca_file: @root_ca_path) do |client|
       client.subscribe(@topic) #subscribe message of airconmode
-      topic, @airconmode= client.get
+      topic, @airconmode = client.get
       puts @airconmode
     end #MQTT end
   end #airconmodeGetter end
@@ -80,17 +80,16 @@ end #class RasPiIotShadow end
 #Following are processed codes
 sensingWithRaspi = RasPiIotShadow.new('/dev/i2c-1')
 
-#Process.daemon
+Process.daemon(nochdir = true, noclose = nil)
 #dataChecker and toKinesis process
 loop do
   begin 
-    Timeout.timeout(1) do #wait 1 sec nad if false -> call rescue
+  Timeout.timeout(3) do #wait 1 sec nad if false -> call rescue
       sensingWithRaspi.airconmodeGetter
       puts "Received airconmode" + sensingWithRaspi.airconmode
-    end
+  end
   rescue Timeout::Error
     puts "dataChecker" + sensingWithRaspi.dataChecker
-    sensingWithRaspi.toKinesis
-    puts "Lets go Kinesis"
   end
+  sensingWithRaspi.toKinesis
 end
