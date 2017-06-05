@@ -46,8 +46,8 @@ class RasPiIotShadow
     hum = (hum_h << 8) | hum_l
     temp = ((temp_h << 8) | temp_l) / 4
 
-    @temp = temp * 1.007e-2 - 40.0
-    @humidity  = hum * 6.10e-3
+    @temp = (temp * 1.007e-2 - 40.0).round(2)
+    @humidity  = (hum * 6.10e-3).round(2)
     outputjson = JSON.generate({"temp" => @temp, "humidity" => @humidity})
     return outputjson
   end #def fetch_humidity_temperature end
